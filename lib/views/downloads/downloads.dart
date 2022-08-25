@@ -3,12 +3,16 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_ebook_app/components/loading_widget.dart';
 import 'package:flutter_ebook_app/database/download_helper.dart';
 import 'package:flutter_ebook_app/util/router.dart';
+import 'package:flutter_ebook_app/views/cubit/main_cubit.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:iridium_reader_widget/views/viewers/epub_screen.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../theme/theme_config.dart';
 
 class Downloads extends StatefulWidget {
   @override
@@ -40,7 +44,7 @@ class _DownloadsState extends State<Downloads> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Downloads'),
+        title: Text('Downloads', style: TextStyle(color: context.watch<MainCubit>().theme == ThemeConfig.lightTheme ?  Colors.white : Colors.black),),
       ),
       body: dls.isEmpty ? _buildEmptyListView() : _buildBodyList(),
     );

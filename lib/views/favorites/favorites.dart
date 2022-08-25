@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_ebook_app/components/book.dart';
 import 'package:flutter_ebook_app/models/category.dart';
-import 'package:flutter_ebook_app/view_models/favorites_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_ebook_app/views/favorites/cubit/favorite_cubit.dart';
 
 class Favorites extends StatefulWidget {
   @override
@@ -27,7 +27,7 @@ class _FavoritesState extends State<Favorites> {
     SchedulerBinding.instance.addPostFrameCallback(
       (_) {
         if (mounted) {
-          Provider.of<FavoritesProvider>(context, listen: false).getFavorites();
+          context.read<FavoriteCubit>().getFavorites();
         }
       },
     );
@@ -35,9 +35,8 @@ class _FavoritesState extends State<Favorites> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<FavoritesProvider>(
-      builder: (BuildContext context, FavoritesProvider favoritesProvider,
-          Widget? child) {
+    return BlocBuilder<FavoriteCubit, FavoriteState>(
+      builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
             centerTitle: true,
@@ -45,9 +44,9 @@ class _FavoritesState extends State<Favorites> {
               'Favorites',
             ),
           ),
-          body: favoritesProvider.posts.isEmpty
+          body: state.posts.isEmpty
               ? _buildEmptyListView()
-              : _buildGridView(favoritesProvider),
+              : _buildGridView(state),
         );
       },
     );
@@ -75,17 +74,17 @@ class _FavoritesState extends State<Favorites> {
     );
   }
 
-  _buildGridView(FavoritesProvider favoritesProvider) {
+  _buildGridView(FavoriteState state) {
     return GridView.builder(
       padding: EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 0.0),
       shrinkWrap: true,
-      itemCount: favoritesProvider.posts.length,
+      itemCount: state.posts.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         childAspectRatio: 200 / 340,
       ),
       itemBuilder: (BuildContext context, int index) {
-        Entry entry = Entry.fromJson(favoritesProvider.posts[index]['item']);
+        Entry entry = Entry.fromJson(state.posts[index]['item']);
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: 5.0),
           child: BookItem(

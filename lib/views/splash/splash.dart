@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_ebook_app/util/router.dart';
 import 'package:flutter_ebook_app/views/main_screen.dart';
+
+import '../home/cubit/home_cubit.dart';
 
 class Splash extends StatefulWidget {
   @override

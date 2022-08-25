@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_ebook_app/components/body_builder.dart';
 import 'package:flutter_ebook_app/components/book_card.dart';
 import 'package:flutter_ebook_app/components/book_list_item.dart';
 import 'package:flutter_ebook_app/models/category.dart';
 import 'package:flutter_ebook_app/util/consts.dart';
 import 'package:flutter_ebook_app/util/router.dart';
-import 'package:flutter_ebook_app/view_models/home_provider.dart';
 import 'package:flutter_ebook_app/views/genre/genre.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_ebook_app/views/home/cubit/home_cubit.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -19,16 +18,17 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance.addPostFrameCallback(
-      (_) => Provider.of<HomeProvider>(context, listen: false).getFeeds(),
-    );
+    // SchedulerBinding.instance.addPostFrameCallback(
+    //   (_) => Provider.of<HomeProvider>(context, listen: false).getFeeds(),
+    // );
+    context.read<HomeCubit>().getFeeds();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Consumer<HomeProvider>(
-      builder: (BuildContext context, HomeProvider homeProvider, Widget? child) {
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
             centerTitle: true,
@@ -39,34 +39,34 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
               ),
             ),
           ),
-          body: _buildBody(homeProvider),
+          body: _buildBody(state),
         );
       },
     );
   }
 
-  Widget _buildBody(HomeProvider homeProvider) {
+  Widget _buildBody(HomeState state) {
     return BodyBuilder(
-      apiRequestStatus: homeProvider.apiRequestStatus,
-      child: _buildBodyList(homeProvider),
-      reload: () => homeProvider.getFeeds(),
+      apiRequestStatus: state.apiRequestStatus,
+      child: _buildBodyList(),
+      reload: () => context.watch<HomeCubit>().getFeeds(),
     );
   }
 
-  Widget _buildBodyList(HomeProvider homeProvider) {
+  Widget _buildBodyList() {
     return RefreshIndicator(
-      onRefresh: () => homeProvider.getFeeds(),
+      onRefresh: () => context.watch<HomeCubit>().getFeeds(),
       child: ListView(
         children: <Widget>[
-          _buildFeaturedSection(homeProvider),
+          _buildFeaturedSection(),
           SizedBox(height: 20.0),
           _buildSectionTitle('Categories'),
           SizedBox(height: 10.0),
-          _buildGenreSection(homeProvider),
+          _buildGenreSection(),
           SizedBox(height: 20.0),
           _buildSectionTitle('Recently Added'),
           SizedBox(height: 20.0),
-          _buildNewSection(homeProvider),
+          _buildNewSection(),
         ],
       ),
     );
@@ -90,7 +90,7 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  _buildFeaturedSection(HomeProvider homeProvider) {
+  _buildFeaturedSection() {
     return Container(
       height: 200.0,
       child: Center(
@@ -98,10 +98,10 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
           primary: false,
           padding: EdgeInsets.symmetric(horizontal: 15.0),
           scrollDirection: Axis.horizontal,
-          itemCount: homeProvider.top.feed?.entry?.length ?? 0,
+          itemCount: context.watch<HomeCubit>().top.feed?.entry?.length ?? 0,
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) {
-            Entry entry = homeProvider.top.feed!.entry![index];
+            Entry entry = context.watch<HomeCubit>().top.feed!.entry![index];
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
               child: BookCard(
@@ -115,7 +115,7 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  _buildGenreSection(HomeProvider homeProvider) {
+  _buildGenreSection() {
     return Container(
       height: 50.0,
       child: Center(
@@ -123,10 +123,10 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
           primary: false,
           padding: EdgeInsets.symmetric(horizontal: 15.0),
           scrollDirection: Axis.horizontal,
-          itemCount: homeProvider.top.feed?.link?.length ?? 0,
+          itemCount: context.watch<HomeCubit>().top.feed?.link?.length ?? 0,
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) {
-            Link link = homeProvider.top.feed!.link![index];
+            Link link = context.watch<HomeCubit>().top.feed!.link![index];
 
             // We don't need the tags from 0-9 because
             // they are not categories
@@ -176,15 +176,15 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  _buildNewSection(HomeProvider homeProvider) {
+  _buildNewSection() {
     return ListView.builder(
       primary: false,
       padding: EdgeInsets.symmetric(horizontal: 15.0),
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
-      itemCount: homeProvider.recent.feed?.entry?.length ?? 0,
+      itemCount: context.watch<HomeCubit>().recent.feed?.entry?.length ?? 0,
       itemBuilder: (BuildContext context, int index) {
-        Entry entry = homeProvider.recent.feed!.entry![index];
+        Entry entry = context.watch<HomeCubit>().recent.feed!.entry![index];
 
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),

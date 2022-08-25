@@ -44,4 +44,6 @@ class ThemeConfig {
       ),
     ),
   );
+
+  static var lightThemeTheme;
 }

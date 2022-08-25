@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_ebook_app/components/body_builder.dart';
 import 'package:flutter_ebook_app/components/book_card.dart';
 import 'package:flutter_ebook_app/components/loading_widget.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_ebook_app/util/api.dart';
 import 'package:flutter_ebook_app/util/router.dart';
 import 'package:flutter_ebook_app/view_models/home_provider.dart';
 import 'package:flutter_ebook_app/views/genre/genre.dart';
+import 'package:flutter_ebook_app/views/home/cubit/home_cubit.dart';
 import 'package:provider/provider.dart';
 
 class Explore extends StatefulWidget {
@@ -19,8 +21,9 @@ class _ExploreState extends State<Explore> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<HomeProvider>(
-      builder: (BuildContext context, HomeProvider homeProvider, Widget? child) {
+    var homeProvider = context.read<HomeCubit>();
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
             centerTitle: true,
@@ -29,7 +32,7 @@ class _ExploreState extends State<Explore> {
             ),
           ),
           body: BodyBuilder(
-            apiRequestStatus: homeProvider.apiRequestStatus,
+            apiRequestStatus: state.apiRequestStatus,
             child: _buildBodyList(homeProvider),
             reload: () => homeProvider.getFeeds(),
           ),
@@ -38,7 +41,7 @@ class _ExploreState extends State<Explore> {
     );
   }
 
-  _buildBodyList(HomeProvider homeProvider) {
+  _buildBodyList(var homeProvider) {
     return ListView.builder(
       itemCount: homeProvider.top.feed?.link?.length ?? 0,
       itemBuilder: (BuildContext context, int index) {
